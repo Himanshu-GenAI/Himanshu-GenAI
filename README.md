@@ -5,13 +5,17 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Himanshu-GenAI/TEAM-ANARCHY"><img src="cards/tile-building.svg" width="32.5%" alt="Now building: UniSync.AI"></a>
-  <a href="https://misinfo-x.vercel.app"><img src="cards/tile-featured.svg" width="32.5%" alt="Featured live: MisInfoX"></a>
-  <a href="mailto:himanshurautela004@gmail.com"><img src="cards/tile-contact.svg" width="32.5%" alt="Say hello"></a>
+  <img src="cards/graph.svg" width="100%" alt="Contribution graph for the last year.">
 </p>
 
 <p align="center">
   <img src="cards/chart.svg" width="100%" alt="Contributions per month, with current streak, active days and busiest day.">
+</p>
+
+<p align="center">
+  <a href="https://github.com/Himanshu-GenAI/TEAM-ANARCHY"><img src="cards/tile-building.svg" width="32.5%" alt="Now building: UniSync.AI"></a>
+  <a href="https://misinfo-x.vercel.app"><img src="cards/tile-featured.svg" width="32.5%" alt="Featured live: MisInfoX"></a>
+  <a href="mailto:himanshurautela004@gmail.com"><img src="cards/tile-contact.svg" width="32.5%" alt="Say hello"></a>
 </p>
 
 <p align="center">
@@ -28,8 +32,4 @@
 
 <p align="center">
   <a href="https://my-portfolio-vufh.vercel.app"><img src="cards/repo-my-portfolio.svg" width="100%" alt="My_Portfolio — the portfolio site these cards are matched to."></a>
-</p>
-
-<p align="center">
-  <img src="cards/graph.svg" width="100%" alt="Contribution graph for the last year.">
 </p>
