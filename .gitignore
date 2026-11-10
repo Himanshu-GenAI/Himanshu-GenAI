@@ -1,0 +1,11 @@
+# font subset cache
+.cache/
+
+# fetched on first run by render.py (see ensure_assets)
+assets/fonts/*.ttf
+assets/portrait.jpg
+
+# local screenshot harness, not referenced by README.md
+preview.html
+shots/
+__pycache__/
