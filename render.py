@@ -386,6 +386,11 @@ KEYFRAMES = """
 .pp{animation:pop .85s cubic-bezier(.34,1.32,.64,1) both;transform-box:fill-box;transform-origin:center}
 .dw{animation:draw 1.6s cubic-bezier(.4,0,.2,1) both}
 .pu{animation:pulse 4.2s ease-in-out infinite}
+.sw{animation:swing 1.15s cubic-bezier(.22,1,.36,1) both;transform-box:fill-box;transform-origin:bottom center}
+.sh{animation:shine 7.5s ease-in-out 1.2s infinite}
+.tsh{animation:tshine 6.5s ease-in-out infinite}
+.rp{animation:ring 4s ease-out 1s infinite;transform-box:fill-box;transform-origin:center}
+.ar{animation:nudge 3.4s ease-in-out infinite}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes rise2{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
@@ -394,6 +399,11 @@ KEYFRAMES = """
 @keyframes pop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
 @keyframes draw{from{stroke-dashoffset:var(--len,420)}to{stroke-dashoffset:0}}
 @keyframes pulse{0%,100%{opacity:.3}50%{opacity:.75}}
+@keyframes swing{from{opacity:0;transform:translateY(22px) rotate(-2.4deg) scale(.96)}60%{opacity:1;transform:translateY(-2px) rotate(.8deg) scale(1.004)}to{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}}
+@keyframes shine{0%{transform:translateX(-260px) skewX(-16deg);opacity:0}6%{opacity:.85}26%{opacity:.85}34%,100%{transform:translateX(1200px) skewX(-16deg);opacity:0}}
+@keyframes tshine{0%{transform:translateX(0) skewX(-12deg);opacity:0}5%{opacity:.34}24%{opacity:.34}30%,100%{transform:translateX(430px) skewX(-12deg);opacity:0}}
+@keyframes ring{0%{opacity:.45;transform:scale(1)}70%,100%{opacity:0;transform:scale(1.85)}}
+@keyframes nudge{0%,100%{transform:translate(0,0)}50%{transform:translate(3px,-3px)}}
 """
 
 # Staggered delays. --o is the card's own start time, set on the root <svg>, so
@@ -536,6 +546,11 @@ def hero(data: dict) -> tuple[int, int, str, str]:
   <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
     <circle cx="1.5" cy="1.5" r="1" fill="#ffffff" opacity=".045"/>
   </pattern>
+  <linearGradient id="shineGrad" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset=".5" stop-color="#ffffff" stop-opacity=".85"/>
+    <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+  </linearGradient>
+  <clipPath id="nameClip">{txt(50, 138, PROFILE['name'], size=50, weight=800, ls=-1.4)}</clipPath>
   <mask id="nameMask" maskUnits="userSpaceOnUse" x="40" y="88" width="540" height="72">
     <rect x="46" y="92" width="530" height="64" fill="#ffffff" class="gx {s(5)}"/>
   </mask>
@@ -552,11 +567,13 @@ def hero(data: dict) -> tuple[int, int, str, str]:
 <rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="26" fill="none" stroke="#ffffff" stroke-opacity=".09"/>"""
 
     left = (
-        f'<circle cx="55" cy="70" r="2.8" fill="{BRAND_2}" class="pp {s(3)}"/>'
+        f'<circle cx="55" cy="70" r="2.8" fill="{BRAND_2}" class="pu {s(3)}"/>'
         + txt(66, 74, PROFILE["eyebrow"], size=11, weight=500, family="JBMono",
               fill=BRAND_SOFT, ls=2.4, cls=f"u2 {s(4)}")
         + f'<g mask="url(#nameMask)">'
         + txt(50, 138, PROFILE["name"], size=50, weight=800, fill="url(#nameGrad)", ls=-1.4)
+        + '<g clip-path="url(#nameClip)"><rect x="-40" y="82" width="200" height="74" '
+          'fill="url(#shineGrad)" opacity="0" class="sh"/></g>'
         + "</g>"
         + f'<rect x="52" y="154" width="68" height="3" rx="1.5" fill="url(#ruleGrad)" class="gx {s(9)}"/>'
         + txt(52, 190, PROFILE["tagline"], size=16, weight=500, fill=TXT_2, cls=f"u {s(11)}")
@@ -605,28 +622,38 @@ def tile(spec: dict, index: int) -> tuple[int, int, str, str]:
   <linearGradient id="tg" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="{colour}"/><stop offset=".75" stop-color="{colour}" stop-opacity=".07"/>
   </linearGradient>
+  <linearGradient id="tshine" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset=".5" stop-color="#ffffff" stop-opacity=".55"/>
+    <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+  </linearGradient>
 </defs>"""
 
+    # the whole tile tilts up and settles; the badge ring pulses out of the
+    # icon corner and a light band sweeps the card every few seconds
+    inner = f"""
+  <circle cx="40" cy="42" r="18" fill="none" stroke="{colour}" stroke-width="2"
+          opacity="0" class="rp"/>
+  <rect x="22" y="24" width="36" height="36" rx="11" fill="{colour}" fill-opacity=".12"
+        stroke="{colour}" stroke-opacity=".3" class="pp {s(4)}"/>
+  <g transform="translate(31 33)">
+    <g fill="none" stroke="{colour}" stroke-width="1.7" stroke-linecap="round"
+       stroke-linejoin="round" class="pp {s(6)}">{ICONS[spec['icon']]}</g>
+  </g>"""
+    inner += txt(22, 88, spec["eyebrow"], size=9.5, weight=500, family="JBMono",
+                 fill=TXT_3, ls=1.7, cls=f"u2 {s(7)}")
+    inner += txt(22, 114, spec["title"], size=18.5, weight=700, fill=TXT, ls=-0.3,
+                 cls=f"u {s(9)}")
+    for i, line in enumerate(spec["lines"]):
+        inner += txt(22, 136 + i * 16, line, size=11.5, weight=400, fill=TXT_2,
+                     cls=f"u2 {s(11 + i)}")
+    inner += txt(272, 166, "↗", size=15, weight=400, family="JBMono", fill=colour,
+                 anchor="end", cls=f"ar {s(15)}")
     body = defs + panel(5, 5, W - 10, H - 10, 18) + f"""
 <g clip-path="url(#tp)">
   <rect x="5" y="5" width="{W - 10}" height="2.5" fill="url(#tg)" class="gx {s(2)}"/>
+  <rect x="-70" y="5" width="46" height="{H - 10}" fill="url(#tshine)" opacity="0" class="tsh"/>
 </g>
-<rect x="22" y="24" width="36" height="36" rx="11" fill="{colour}" fill-opacity=".12"
-      stroke="{colour}" stroke-opacity=".3" class="pp {s(4)}"/>
-<g transform="translate(31 33)">
-  <g fill="none" stroke="{colour}" stroke-width="1.7" stroke-linecap="round"
-     stroke-linejoin="round" class="pp {s(6)}">{ICONS[spec['icon']]}</g>
-</g>
-"""
-    body += txt(22, 88, spec["eyebrow"], size=9.5, weight=500, family="JBMono",
-                fill=TXT_3, ls=1.7, cls=f"u2 {s(7)}")
-    body += txt(22, 114, spec["title"], size=18.5, weight=700, fill=TXT, ls=-0.3,
-                cls=f"u {s(9)}")
-    for i, line in enumerate(spec["lines"]):
-        body += txt(22, 136 + i * 16, line, size=11.5, weight=400, fill=TXT_2,
-                    cls=f"u2 {s(11 + i)}")
-    body += txt(272, 166, "↗", size=15, weight=400, family="JBMono", fill=colour,
-                anchor="end", cls=f"u2 {s(14)}")
+<g class="sw {s(3)}">{inner}</g>"""
     return W, H, body, spec["title"]
 
 
@@ -906,16 +933,24 @@ def assemble(w: int, h: int, body: str, label: str, offset: float) -> str:
 
 def preview_page(entries: list[tuple[str, str]]) -> str:
     """A local stand-in for the README so the stack can be eyeballed."""
-    hero_file = entries[0][0]
-    tiles = entries[1:4]
-    rest = entries[4:]
-    tile_html = "".join(
-        f'<a href="#"><img src="cards/{name}" width="32.5%" alt="{esc(alt)}"></a>'
-        for name, alt in tiles
-    )
-    rest_html = "".join(
-        f'<img src="cards/{name}" width="100%" alt="{esc(alt)}">' for name, alt in rest
-    )
+    rows: list[str] = []
+    tile_row: list[str] = []
+
+    def flush_tiles() -> None:
+        if tile_row:
+            rows.append('<div class="tiles">' + "".join(tile_row) + "</div>")
+            tile_row.clear()
+
+    for name, alt in entries:
+        if name.startswith("tile-"):
+            tile_row.append(
+                f'<a href="#"><img src="cards/{name}" width="32.5%" alt="{esc(alt)}"></a>'
+            )
+        else:
+            flush_tiles()
+            rows.append(f'<img src="cards/{name}" width="100%" alt="{esc(alt)}">')
+    flush_tiles()
+    stack_html = "\n".join(rows)
     mode = "static frame (STATIC=1)" if STATIC else "animated"
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>profile cards — {mode}</title>
@@ -933,9 +968,7 @@ def preview_page(entries: list[tuple[str, str]]) -> str:
 <body><div class="wrap">
 <p class="note">Local preview — {mode}. This file is not referenced by README.md.</p>
 <div class="stack">
-<img src="cards/{hero_file}" width="100%" alt="hero">
-<div class="tiles">{tile_html}</div>
-{rest_html}
+{stack_html}
 </div></div></body></html>
 """
 
@@ -953,19 +986,21 @@ def main() -> None:
     CARDS.mkdir(parents=True, exist_ok=True)
     rendered: list[tuple[str, int, int, str, str]] = []
 
+    # layout follows the reference build: face, then the graph and the monthly
+    # bars right under it, then the colourful tiles, then what he is coding
     rendered.append(("hero", *hero(data)))
+    rendered.append(("graph", *graph(stats)))
+    rendered.append(("chart", *chart(stats)))
     for i, spec in enumerate(TILES):
         rendered.append((spec["file"], *tile(spec, i)))
-    rendered.append(("chart", *chart(stats)))
     for i, spec in enumerate(FEATURED):
         rendered.append(
             (f"repo-{slug(spec['repo'])}", *repo_card(spec, i, len(FEATURED), repos))
         )
-    rendered.append(("graph", *graph(stats)))
 
     written = []
     for index, (name, w, h, body, label) in enumerate(rendered):
-        offset = index * 0.1
+        offset = index * 0.12
         svg = assemble(w, h, body, label, offset)
         path = CARDS / f"{name}.svg"
         path.write_text(svg, encoding="utf-8")
