@@ -2,7 +2,9 @@ name: profile cards
 
 on:
   schedule:
-    - cron: "17 3 * * *" # daily, 03:17 UTC
+    # Hourly, offset off the top of the hour: GitHub delays scheduled runs that
+    # pile up on :00, and a 24h gap left the cards a day behind the data.
+    - cron: "23 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
