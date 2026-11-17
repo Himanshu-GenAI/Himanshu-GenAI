@@ -2,9 +2,12 @@ name: profile cards
 
 on:
   schedule:
-    # Hourly, offset off the top of the hour: GitHub delays scheduled runs that
-    # pile up on :00, and a 24h gap left the cards a day behind the data.
-    - cron: "23 * * * *"
+    # Five minutes is the shortest interval GitHub Actions allows; cron here has
+    # minute resolution and GitHub drops/delays very frequent schedules. A
+    # 10-second refresh is also impossible downstream: GitHub serves each card
+    # SVG with `cache-control: max-age=300` and keys that cache on the path, so
+    # no query-string buster can shorten it.
+    - cron: "2-59/5 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
